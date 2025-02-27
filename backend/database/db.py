@@ -16,25 +16,30 @@ def clean_data(data):
     """Clean the data before inserting into MongoDB"""
     cleaned = []
     for item in data:
-        # Convert empty strings to None for numeric fields
+        # Convert empty strings and invalid values to 0 for numeric fields
         for field in ['intensity', 'likelihood', 'relevance']:
-            if field in item:
-                try:
-                    item[field] = float(item[field]) if item[field] != '' else 0
-                except (ValueError, TypeError):
-                    item[field] = 0
+            try:
+                value = item.get(field, '')
+                item[field] = float(value) if value not in ['', None, 'null'] else 0.0
+            except (ValueError, TypeError):
+                item[field] = 0.0
         
         # Clean end_year field
-        if 'end_year' in item:
-            try:
-                item['end_year'] = str(int(float(item['end_year']))) if item['end_year'] != '' else 'Unknown'
-            except (ValueError, TypeError):
+        try:
+            end_year = item.get('end_year', '')
+            if end_year and end_year != 'null':
+                # Try to convert to integer first
+                year = int(float(end_year))
+                item['end_year'] = str(year)
+            else:
                 item['end_year'] = 'Unknown'
+        except (ValueError, TypeError):
+            item['end_year'] = 'Unknown'
         
-        # Ensure string fields are not None
+        # Ensure string fields are not None or empty
         for field in ['sector', 'topic', 'region', 'country', 'city', 'pestle', 'source']:
-            if field in item:
-                item[field] = str(item[field]) if item[field] not in [None, ''] else 'Unknown'
+            value = item.get(field, '')
+            item[field] = str(value) if value not in [None, '', 'null'] else 'Unknown'
         
         cleaned.append(item)
     return cleaned
@@ -56,11 +61,35 @@ def get_database():
         logger.error(f"Error connecting to MongoDB Atlas: {str(e)}")
         raise
 
+def calculate_base_metrics(data):
+    """Calculate base metrics for the entire dataset"""
+    total_records = len(data)
+    
+    # Helper function to safely convert values to float
+    def safe_float(value):
+        try:
+            return float(value) if value not in [None, '', 'null'] else 0.0
+        except (ValueError, TypeError):
+            return 0.0
+    
+    # Calculate metrics with proper type conversion
+    intensity_values = [safe_float(d.get('intensity')) for d in data]
+    likelihood_values = [safe_float(d.get('likelihood')) for d in data]
+    relevance_values = [safe_float(d.get('relevance')) for d in data]
+    
+    return {
+        'total_records': total_records,
+        'avg_intensity': round(sum(intensity_values) / total_records, 2) if total_records > 0 else 0,
+        'avg_likelihood': round(sum(likelihood_values) / total_records, 2) if total_records > 0 else 0,
+        'avg_relevance': round(sum(relevance_values) / total_records, 2) if total_records > 0 else 0
+    }
+
 def init_db():
     """Initialize database and load data if needed"""
     try:
         db = get_database()
         collection = db['visualizations']
+        metrics_collection = db['base_metrics']
         
         # Check if data already exists
         if collection.count_documents({}) == 0:
@@ -80,8 +109,21 @@ def init_db():
                 # Insert data into MongoDB
                 result = collection.insert_many(cleaned_data)
                 logger.info(f"Successfully loaded {len(result.inserted_ids)} records into MongoDB Atlas")
+                
+                # Calculate and store base metrics
+                base_metrics = calculate_base_metrics(cleaned_data)
+                metrics_collection.delete_many({})  # Clear existing metrics
+                metrics_collection.insert_one(base_metrics)
+                logger.info("Successfully stored base metrics")
         else:
             logger.info(f"Data already exists in database ({collection.count_documents({})} records)")
+            
+            # Ensure base metrics exist
+            if metrics_collection.count_documents({}) == 0:
+                data = list(collection.find({}, {'_id': 0}))
+                base_metrics = calculate_base_metrics(data)
+                metrics_collection.insert_one(base_metrics)
+                logger.info("Successfully stored base metrics")
             
     except Exception as e:
         logger.error(f"Error initializing database: {str(e)}")
@@ -133,4 +175,14 @@ def get_collection():
         return db['data']
     except Exception as e:
         logger.error(f"Error connecting to database: {str(e)}")
-        raise 
+        raise
+
+def get_base_metrics():
+    """Get the base metrics for the entire dataset"""
+    try:
+        db = get_database()
+        metrics = db['base_metrics'].find_one({}, {'_id': 0})
+        return metrics if metrics else {}
+    except Exception as e:
+        logger.error(f"Error fetching base metrics: {str(e)}")
+        return {} 

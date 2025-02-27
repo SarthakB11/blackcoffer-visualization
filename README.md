@@ -1,101 +1,121 @@
 # Data Visualization Dashboard
 
-This project is a data visualization dashboard that displays various metrics and insights from the provided JSON data. It uses MongoDB Atlas for the database, Flask for the backend API, and React with Chart.js for the frontend visualization.
-
-## Prerequisites
-
-- Python 3.7+
-- Node.js 14+
-- MongoDB Atlas account
-
-## Setup
-
-1. Clone the repository
-
-### MongoDB Atlas Setup
-
-1. Create a MongoDB Atlas account at https://www.mongodb.com/cloud/atlas
-2. Create a new cluster (the free tier is sufficient)
-3. In the Security section:
-   - Create a database user with read/write permissions
-   - Add your IP address to the IP Access List
-4. Click "Connect" on your cluster and select "Connect your application"
-5. Copy the connection string
-6. Create a `.env` file in the backend directory and add:
-   ```
-   MONGODB_URI=your_mongodb_atlas_connection_string_here
-   ```
-   Replace `your_mongodb_atlas_connection_string_here` with your actual connection string
-
-### Backend Setup
-
-1. Create a Python virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-2. Install Python dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Start the Flask backend:
-```bash
-cd backend
-python run.py
-```
-
-The backend will run on http://localhost:5000
-
-### Frontend Setup
-
-1. Install frontend dependencies:
-```bash
-cd frontend
-npm install
-```
-
-2. Start the React development server:
-```bash
-npm start
-```
-
-The frontend will run on http://localhost:3000
+A full-stack data visualization dashboard built with Flask (Backend) and React (Frontend), featuring interactive charts and filtering capabilities.
 
 ## Features
 
-- Interactive data visualization with Chart.js
-- Multiple chart types (Line, Bar, Pie)
-- Filtering capabilities:
-  - End Year
-  - Topics
-  - Sector
-  - Region
-  - PEST
-  - Source
-  - SWOT
-  - Country
-  - City
-- Real-time data updates
-- Responsive design
-- Cloud-hosted database with MongoDB Atlas
+- Interactive data visualization using Chart.js
+- Real-time filtering capabilities
+- MongoDB integration for data storage
+- RESTful API endpoints
+- Responsive Material-UI design
+
+## Tech Stack
+
+### Backend
+- Flask
+- MongoDB
+- Python 3.x
+- pymongo
+
+### Frontend
+- React
+- TypeScript
+- Material-UI
+- Chart.js
+- react-chartjs-2
+
+## Project Structure
+
+```
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   └── routes.py
+│   ├── database/
+│   │   └── db.py
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── types/
+│   │   └── App.tsx
+│   └── package.json
+└── README.md
+```
+
+## Setup Instructions
+
+### Backend Setup
+
+1. Create a virtual environment:
+   ```bash
+   python -m venv env
+   source env/bin/activate  # On Windows: env\Scripts\activate
+   ```
+
+2. Install dependencies:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+3. Create a `.env` file in the backend directory with your MongoDB connection string:
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   ```
+
+4. Run the Flask server:
+   ```bash
+   python run.py
+   ```
+
+### Frontend Setup
+
+1. Install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
 ## API Endpoints
 
-- GET `/api/data` - Get all visualization data
-- GET `/api/filters` - Get all available filter options
-- GET `/api/metrics` - Get aggregated metrics
+- `GET /api/data`: Get all or filtered data
+- `GET /api/filters`: Get available filter options
+- `GET /api/metrics`: Get data metrics (total records, averages)
 
-## Technologies Used
+## Features
 
-- Backend:
-  - Flask
-  - MongoDB Atlas
-  - Python
-- Frontend:
-  - React
-  - TypeScript
-  - Material-UI
-  - Chart.js
-  - Axios 
+1. **Data Visualization**
+   - Bar charts for sector analysis
+   - Pie charts for regional distribution
+   - Line charts for time trends
+
+2. **Filtering Capabilities**
+   - End Year
+   - Topic
+   - Sector
+   - Region
+   - PEST
+   - Source
+   - Country
+   - City
+
+3. **Metrics Display**
+   - Total Records
+   - Average Intensity
+   - Average Likelihood
+   - Average Relevance
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request 

@@ -1,11 +1,12 @@
-import { Grid, Paper, Typography } from '@mui/material'
+import { Grid, Paper, Typography, Skeleton } from '@mui/material'
 import { Metrics } from '../types'
 
 interface MetricsPanelProps {
   metrics: Metrics;
+  loading?: boolean;
 }
 
-export default function MetricsPanel({ metrics }: MetricsPanelProps) {
+export default function MetricsPanel({ metrics, loading = false }: MetricsPanelProps) {
   const metricCards = [
     {
       title: 'Total Records',
@@ -46,9 +47,18 @@ export default function MetricsPanel({ metrics }: MetricsPanelProps) {
             <Typography variant="h6" component="div" gutterBottom>
               {metric.title}
             </Typography>
-            <Typography variant="h4" component="div">
-              {typeof metric.value === 'number' ? metric.value.toFixed(1) : metric.value}
-            </Typography>
+            {loading ? (
+              <Skeleton 
+                variant="rectangular" 
+                width={100} 
+                height={48} 
+                sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)' }} 
+              />
+            ) : (
+              <Typography variant="h4" component="div">
+                {typeof metric.value === 'number' ? metric.value.toFixed(1) : metric.value}
+              </Typography>
+            )}
           </Paper>
         </Grid>
       ))}

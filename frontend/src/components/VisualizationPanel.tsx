@@ -10,7 +10,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  ChartOptions
 } from 'chart.js'
 import { Line, Bar, Pie } from 'react-chartjs-2'
 import { DataItem } from '../types'
@@ -37,6 +38,49 @@ interface TabPanelProps {
   value: number;
 }
 
+const commonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top' as const,
+    },
+  },
+}
+
+const barOptions: ChartOptions<'bar'> = {
+  ...commonOptions,
+  plugins: {
+    ...commonOptions.plugins,
+    title: {
+      display: true,
+      text: 'Intensity by Sector',
+    },
+  },
+}
+
+const pieOptions: ChartOptions<'pie'> = {
+  ...commonOptions,
+  plugins: {
+    ...commonOptions.plugins,
+    title: {
+      display: true,
+      text: 'Likelihood by Region',
+    },
+  },
+}
+
+const lineOptions: ChartOptions<'line'> = {
+  ...commonOptions,
+  plugins: {
+    ...commonOptions.plugins,
+    title: {
+      display: true,
+      text: 'Relevance Over Time',
+    },
+  },
+}
+
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props
 
@@ -47,7 +91,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3, height: '400px' }}>
           {children}
         </Box>
       )}
@@ -58,14 +102,14 @@ function TabPanel(props: TabPanelProps) {
 export default function VisualizationPanel({ data }: VisualizationPanelProps) {
   const [tabValue, setTabValue] = useState(0)
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue)
   }
 
   // Prepare data for intensity by sector
   const sectorData = data.reduce((acc: { [key: string]: number }, item) => {
-    if (item.sector) {
-      acc[item.sector] = (acc[item.sector] || 0) + item.intensity
+    if (item.sector && item.sector !== 'Unknown') {
+      acc[item.sector] = (acc[item.sector] || 0) + (item.intensity || 0)
     }
     return acc
   }, {})
@@ -85,8 +129,8 @@ export default function VisualizationPanel({ data }: VisualizationPanelProps) {
 
   // Prepare data for likelihood by region
   const regionData = data.reduce((acc: { [key: string]: number }, item) => {
-    if (item.region) {
-      acc[item.region] = (acc[item.region] || 0) + item.likelihood
+    if (item.region && item.region !== 'Unknown') {
+      acc[item.region] = (acc[item.region] || 0) + (item.likelihood || 0)
     }
     return acc
   }, {})
@@ -97,8 +141,8 @@ export default function VisualizationPanel({ data }: VisualizationPanelProps) {
       {
         label: 'Likelihood by Region',
         data: Object.values(regionData),
-        backgroundColor: Object.keys(regionData).map(() => 
-          `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.5)`
+        backgroundColor: Object.keys(regionData).map((_, index) => 
+          `hsl(${(index * 360) / Object.keys(regionData).length}, 70%, 60%)`
         ),
       },
     ],
@@ -106,8 +150,8 @@ export default function VisualizationPanel({ data }: VisualizationPanelProps) {
 
   // Prepare data for relevance over time
   const timeData = data.reduce((acc: { [key: string]: number }, item) => {
-    if (item.end_year) {
-      acc[item.end_year] = (acc[item.end_year] || 0) + item.relevance
+    if (item.end_year && item.end_year !== 'Unknown') {
+      acc[item.end_year] = (acc[item.end_year] || 0) + (item.relevance || 0)
     }
     return acc
   }, {})
@@ -119,7 +163,9 @@ export default function VisualizationPanel({ data }: VisualizationPanelProps) {
         label: 'Relevance Over Time',
         data: Object.keys(timeData).sort().map(key => timeData[key]),
         borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.1,
+        fill: true,
       },
     ],
   }
@@ -138,21 +184,21 @@ export default function VisualizationPanel({ data }: VisualizationPanelProps) {
         <Typography variant="h6" gutterBottom>
           Intensity Distribution by Sector
         </Typography>
-        <Bar data={sectorChartData} />
+        <Bar options={barOptions} data={sectorChartData} />
       </TabPanel>
 
       <TabPanel value={tabValue} index={1}>
         <Typography variant="h6" gutterBottom>
           Likelihood Distribution by Region
         </Typography>
-        <Pie data={regionChartData} />
+        <Pie options={pieOptions} data={regionChartData} />
       </TabPanel>
 
       <TabPanel value={tabValue} index={2}>
         <Typography variant="h6" gutterBottom>
           Relevance Trends Over Time
         </Typography>
-        <Line data={timeChartData} />
+        <Line options={lineOptions} data={timeChartData} />
       </TabPanel>
     </Box>
   )
