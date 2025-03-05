@@ -177,3 +177,75 @@ p {
     font-size: 1.5rem;
   }
 }
+
+/* Chart tooltip styles */
+.chart-tooltip {
+  position: absolute;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-width: 250px;
+  font-size: 12px;
+  line-height: 1.5;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.chart-tooltip-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 3px;
+}
+
+.chart-tooltip-value {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.chart-tooltip-label {
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+/* Ensure charts are responsive */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chart-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Add animation for chart elements */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.chart-animate-in {
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+
+/* Responsive adjustments for charts */
+@media (max-width: 768px) {
+  .chart-tooltip {
+    max-width: 200px;
+    font-size: 11px;
+  }
+}
