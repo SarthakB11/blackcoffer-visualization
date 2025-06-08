@@ -1,0 +1,60 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - main # Or your default branch
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3 # Or v4 if preferred
+      - name: Set up Python
+        uses: actions/setup-python@v3 # Or v4/v5
+        with:
+          python-version: '3.12'
+      - name: Create virtual environment and install dependencies
+        run: |
+          python -m venv env
+          source env/bin/activate
+          pip install -r requirements.txt
+      - name: Create .env file
+        run: |
+          echo "DB_CONNECTION_STRING=${{ secrets.MONGODB_URI }}" > backend/.env
+      - name: Run backend application (test start)
+        run: |
+          source env/bin/activate
+          python backend/run.py &
+          sleep 5 # Give the server a moment to start
+          # Add a command here to check if the server is running if possible, e.g., curl localhost:5000
+          # For now, we'll assume it starts if the script doesn't error out immediately.
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend # Set working directory for frontend steps
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Specify a Node.js version (LTS often good)
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json # Ensure this path is correct
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci # Use ci for faster, more reliable builds in CI
+      - name: Build frontend application
+        working-directory: ./frontend
+        run: npm run build
+      - name: Deploy frontend (placeholder)
+        run: |
+          echo "Simulating frontend deployment..."
+          echo "Build artifacts are in frontend/dist:"
+          ls -l frontend/dist # List build artifacts as a check
+          # In a real scenario, this would involve copying frontend/dist
+          # to a static web host (S3, Firebase, Netlify, GitHub Pages, etc.)

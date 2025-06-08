@@ -10,7 +10,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load environment variables
-load_dotenv()
+# Get the directory of the current file (db.py)
+BASE_DIR = Path(__file__).resolve().parent
+# Construct the path to the .env file in the same directory as db.py (backend/database/.env)
+# However, the task asked for backend/.env, so we go one level up from db.py's parent.
+DOTENV_PATH = BASE_DIR.parent / '.env'
+load_dotenv(dotenv_path=DOTENV_PATH)
 
 def clean_data(data):
     """Clean the data before inserting into MongoDB"""
@@ -47,9 +52,9 @@ def clean_data(data):
 def get_database():
     """Get MongoDB database connection"""
     try:
-        MONGODB_URI = os.getenv('MONGODB_URI')
+        MONGODB_URI = os.getenv('DB_CONNECTION_STRING') # Changed from MONGODB_URI
         if not MONGODB_URI:
-            raise ValueError("MongoDB Atlas connection string not found in environment variables")
+            raise ValueError("MongoDB Atlas connection string (DB_CONNECTION_STRING) not found in environment variables")
         
         client = MongoClient(MONGODB_URI)
         # Test connection
@@ -161,9 +166,9 @@ def get_distinct_values(field):
 
 def get_collection():
     try:
-        mongodb_uri = os.getenv('MONGODB_URI')
+        mongodb_uri = os.getenv('DB_CONNECTION_STRING') # Changed from MONGODB_URI
         if not mongodb_uri:
-            raise ValueError("MongoDB Atlas connection string not found in environment variables")
+            raise ValueError("MongoDB Atlas connection string (DB_CONNECTION_STRING) not found in environment variables")
             
         client = MongoClient(mongodb_uri)
         db = client['visualization_db']
