@@ -2,6 +2,10 @@
 
 A full-stack data visualization dashboard built with Flask (Backend) and React (Frontend), featuring interactive charts and filtering capabilities.
 
+Frontend deployed at https://sarthakb11.github.io/blackcoffer-visualization/
+
+Backend has to be deployed at Railway/Render etc. [To be done]
+
 ## Features
 
 - Interactive data visualization using Chart.js
@@ -15,7 +19,7 @@ A full-stack data visualization dashboard built with Flask (Backend) and React (
 ### Backend
 - Flask
 - MongoDB
-- Python 3.x
+- Python 3.12
 - pymongo
 
 ### Frontend
