@@ -1,4 +1,4 @@
-#!/home/niveus/Downloads/project/blackcoffer-visualization/env/bin/python3
+#!/app/env/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
